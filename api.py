@@ -1,6 +1,8 @@
 import os
 import re
 import json
+import time
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -156,9 +158,8 @@ class SpaceManAPI(Browser):
         if not os.path.exists(f"{self.filename}.json"):
             print("Gerando novo j_session_id...")
             login = self.auth()
-            print(sma.get_profile())
             if login.get("error"):
-                print(f"Erro, usuário {self.email} é inválido!!!")
+                print(f"Erro, usuário {self.email} ou {self.password} inválidos!!!")
                 exit()
             self.start_game()
             self.get_session()
@@ -186,14 +187,12 @@ class SpaceManAPI(Browser):
 
 if __name__ == '__main__':
     sma = SpaceManAPI("email@gmail.com", "senha123")
-    try:
-        sma.check_session()
-    except:
-        print("Error:", "Conexão recusada!!!")
-        exit()
+    sma.check_session()
     # sma.is_connected = False # SE QUISER RECONECTAR PARA MANTER SEMPRE COM A ULTIMA SESSÃO ATIVA
     if not sma.is_connected:
         sma.reconnect()
-    data = sma.game_data()
-    if data["result"]:
-        print(json.dumps(data["object"], indent=4))
+    while True:
+        data = sma.game_data()
+        if data["result"]:
+            print(json.dumps(data["object"], indent=4))
+        time.sleep(5)
